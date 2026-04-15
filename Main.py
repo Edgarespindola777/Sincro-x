@@ -78,5 +78,3 @@ with st.expander("📝 NOTA DE AUTORIDAD TÉCNICA"):
     Metano Abiótico en el Basamento Cristalino.
     """)
     st.caption("Dr. Edgar Espíndola Niño | Investigador Principal")
-
-Dígame qué hace este software.
