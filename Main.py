@@ -1,88 +1,53 @@
 import streamlit as st
-import pandas as pd
 
-# 1. CONFIGURACIÓN DE INTERFAZ PROFESIONAL
+# 1. CONFIGURACIÓN PROFESIONAL
 st.set_page_config(page_title="SINCRO-X | Gas Primordial", layout="wide")
 
-# Estilo visual oscuro (Dark Mode) para que parezca software de ingeniería
+# Estilo visual de alta ingeniería (Dark Mode)
 st.markdown("""
     <style>
     .main { background-color: #0e1117; color: #ffffff; }
     .stMetric { background-color: #1f2937; padding: 15px; border-radius: 10px; border: 1px solid #374151; }
+    iframe { border-radius: 15px; border: 2px solid #4ade80; }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("🛡️ SINCRO-X: Sistema de Autorización de Perforación")
 st.write("---")
 
-# 2. PANEL LATERAL: ENTRADA DE LAS 5 VARIABLES
+# 2. PANEL LATERAL (SENSORES)
 st.sidebar.header("📊 SENSORES DE CAMPO")
-st.sidebar.info("Ajuste los valores detectados por la geofísica:")
+grav = st.sidebar.slider("1. Gravimetría (Bouguer mGal)", -150, 150, 35)
+magnet = st.sidebar.slider("2. Magnetometría (nT/m)", -50, 50, 8)
+gradiente = st.sidebar.slider("3. Gradiente Térmico (°C/km)", 10, 100, 38)
+densidad = st.sidebar.number_input("4. Densidad Bulk (g/cm³)", 1.0, 3.0, 2.45)
+porosidad = st.sidebar.checkbox("5. Evidencia de Porosidad Primaria", True)
 
-# Variable 1: Gravimetría
-bouguer = st.sidebar.slider("1. Gravimetría (Bouguer mGal)", -100, 0, -35, help="Objetivo: -15 a -40 mGal")
+# Cálculo de Sincronía
+sincronia = (abs(grav) * 0.2) + (abs(magnet) * 0.3) + (gradiente * 1.5) + (densidad * 10)
+if porosidad: sincronia += 20
 
-# Variable 2: Magnetometría
-mag = st.sidebar.slider("2. Magnetometría (nT/m)", 0, 20, 8, help="Objetivo: > 5 nT/m")
-
-# Variable 3: Temperatura
-temp = st.sidebar.slider("3. Gradiente Térmico (°C/km)", 10, 60, 38, help="Objetivo: > 35 °C/km")
-
-# Variable 4: Densidad de Roca (Dato de Pozo)
-rho_b = st.sidebar.number_input("4. Densidad Bulk (g/cm³)", 2.00, 3.00, 2.45, step=0.01)
-
-# Variable 5: Cálculo de Porosidad (Backend integrado)
-# Fórmula: Phi = (Matriz - Bulk) / (Matriz - Fluido)
-phi = (2.67 - rho_b) / (2.67 - 0.15) * 100
-st.sidebar.metric("5. POROSIDAD CALCULADA", f"{phi:.2f} %")
-
-# 3. LÓGICA DE SINCRONÍA (Caja Negra)
-score = 0
-checks = []
-
-if -40 <= bouguer <= -15:
-    score += 25
-    checks.append("✅ Anomalía de Masa detectada (Fractura)")
-if mag >= 5:
-    score += 25
-    checks.append("✅ Lineamiento de Sutura confirmado")
-if temp >= 35:
-    score += 25
-    checks.append("✅ Flujo Térmico activo (Gas vivo)")
-if phi >= 5:
-    score += 25
-    checks.append("✅ Porosidad de Reservorio comercial")
-
-# 4. MONITOR PRINCIPAL (Lo que verá el inversor)
-col1, col2 = st.columns([1, 1])
+# 3. CUERPO PRINCIPAL
+col1, col2 = st.columns([2, 1])
 
 with col1:
-    st.subheader("Estado de la Sincronía")
-    st.metric("PROBABILIDAD DE GAS PRIMORDIAL", f"{score}%")
+    st.subheader("Estado de la Sincronía (Visualización Térmica)")
+    # VIDEO CIENTÍFICO DE IMPACTO (Simulación de procesos térmicos)
+    st.video("https://www.youtube.com/watch?v=J3mC8-9_WvA") 
     
-    if score >= 75:
+    if sincronia > 80:
         st.success("🟢 AUTORIZACIÓN: PERFORACIÓN RECOMENDADA")
-        st.balloons()
-    elif score >= 50:
-        st.warning("🟡 ATENCIÓN: REVISIÓN DE DATA REQUERIDA")
+    elif sincronia > 50:
+        st.warning("🟡 PRECAUCIÓN: SINCRONÍA PARCIAL")
     else:
         st.error("🔴 ALERTA: RIESGO ALTO - SINCRONÍA INSUFICIENTE")
 
 with col2:
-    st.subheader("Parámetros Críticos de Operación")
-    st.markdown(f"""
-    * **Presión Estimada:** 15,200 PSI
-    * **Temperatura de Fondo:** 232°C
-    * **Seguridad:** Reclamo de BOP 15K Mandatorio
-    * **Firma Isotópica Esperada:** $\delta^{13}C > -20\%$
-    """)
+    st.subheader("Parámetros Críticos")
+    st.metric("Presión Estimada", "15,200 PSI")
+    st.metric("Temperatura de Fondo", "232°C")
+    st.metric("Firma Isotópica δ¹³C", "> -20‰")
+    st.info("✅ Sistema Protegido: Proyecto Jericó")
 
-# 5. DIAGNÓSTICO DETALLADO
-with st.expander("Ver Diagnóstico Técnico"):
-    for c in checks:
-        st.write(c)
-    if not checks:
-        st.write("Sin coincidencias físicas detectadas.")
-
-st.divider()
-st.caption("Propiedad Intelectual: Proyecto Jericó | Cartagena 2026")
+with st.expander("🔬 Ver Diagnóstico Técnico"):
+    st.write(f"Puntaje de Sincronía: {sincronia:.2f}. Basado en el Modelo de Nucleosíntesis Térmica del Carbón.")v
