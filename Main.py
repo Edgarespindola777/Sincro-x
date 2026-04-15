@@ -2,40 +2,65 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+import base64
 
-# CONFIGURACIÓN DE PANTALLA
-st.set_page_config(page_title="SINCRO+ X", layout="wide")
+# CONFIGURACIÓN TÁCTICA
+st.set_page_config(page_title="SINCRO+ X | MISSION CONTROL", layout="wide")
 
-# LÓGICA DE VARIABLES INICIAL (Fuera del CSS para reactividad)
-if 'v1' not in st.session_state:
-    v1, v2, v3, v4, v5, v6 = 120.0, -85.0, 450.0, 7.5, 2.8, 15.0
+# LÓGICA DE CÁLCULO INICIAL PARA ESTADOS
+if 'v1' not in st.session_state: v1, v2, v3, v4, v5, v6 = 120.0, -85.0, 450.0, 7.5, 2.8, 15.0
+else: v1, v2, v3, v4, v5, v6 = st.session_state.v1, st.session_state.v2, st.session_state.v3, st.session_state.v4, st.session_state.v5, st.session_state.v6
+
+# DETERMINACIÓN DE COLORES Y ESTADOS (SEMÁFORO)
+sync_score = (v4 * 8) + (v6 / 2)
+if sync_score < 45:
+    status_color, status_text, blink_class = "#2E7D32", "COLD: SCANNING", "blink-slow" # Verde
+elif sync_score < 85:
+    status_color, status_text, blink_class = "#FBC02D", "WARMING: TARGET ACQUISITION", "blink-medium" # Amarillo
 else:
-    v1, v2, v3, v4, v5, v6 = st.session_state.v1, st.session_state.v2, st.session_state.v3, st.session_state.v4, st.session_state.v5, st.session_state.v6
+    status_color, status_text, blink_class = "#B71C1C", "DRILLING POINT CONFIRMED", "blink-fast" # Rojo
 
-# CSS: ESTÉTICA DE FONDO INTEGRADO
-st.markdown("""
+# CSS: ANIMACIONES DE PARPADEO Y DISEÑO INTEGRADO
+st.markdown(f"""
     <style>
-    .stApp { background-color: #E0E0E0; color: #0D47A1; font-family: 'Courier New', monospace; }
-    .main-title { color: #0D47A1; text-align: center; font-size: 2em; font-weight: bold; margin-bottom: 20px; }
+    .stApp {{ background-color: #E0E0E0; color: #0D47A1; font-family: 'Courier New', monospace; }}
+    .main-title {{ color: #0D47A1; text-align: center; font-size: 2.2em; font-weight: bold; margin-bottom: 20px; }}
     
-    .value-box {
-        background-color: #FFFFFF; border: 2px solid #0D47A1; padding: 10px;
-        border-radius: 5px; font-size: 2.5em; font-weight: bold; text-align: center;
-    }
-    .label-outside { color: #0D47A1; font-weight: bold; text-align: center; margin-bottom: 5px; text-transform: uppercase; }
+    /* ANIMACIONES DE PARPADEO */
+    @keyframes blink {{ 0% {{ opacity: 1; }} 50% {{ opacity: 0.1; }} 100% {{ opacity: 1; }} }}
+    .blink-slow {{ animation: blink 2s infinite; }}
+    .blink-medium {{ animation: blink 1s infinite; }}
+    .blink-fast {{ animation: blink 0.5s infinite; font-weight: black; }}
     
-    .status-indicator {
-        font-size: 1.1em; font-weight: bold; padding: 8px; border-radius: 4px; text-align: center; margin-top: 10px;
-    }
+    .value-box {{
+        background-color: #FFFFFF; border: 3px solid {status_color}; padding: 15px;
+        border-radius: 8px; font-size: 3em; font-weight: bold; text-align: center;
+    }}
+    .label-outside {{ color: #0D47A1; font-weight: bold; text-align: center; margin-bottom: 5px; }}
     
-    .modular-panel {
-        background-color: rgba(255, 255, 255, 0.8); border: 1px solid #BDBDBD; padding: 15px;
-        border-radius: 4px; margin-bottom: 10px;
-    }
+    .status-box {{
+        background-color: {status_color}; color: white; padding: 15px;
+        border-radius: 5px; text-align: center; font-size: 1.5em; margin-top: 10px;
+    }}
+    
+    .coord-panel {{
+        background-color: rgba(255, 255, 255, 0.9); border: 2px solid #0D47A1; padding: 20px;
+        border-radius: 10px; text-align: center;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
-# SIDEBAR: ENTRADA DE DATOS
+# FUNCIÓN PARA EL SONIDO "BING BANG" (Simulado vía HTML5)
+def play_discovery_sound():
+    sound_html = f"""
+        <audio autoplay loop>
+        <source src="https://www.soundjay.com/buttons/beep-01a.mp3" type="audio/mpeg">
+        </audio>
+    """
+    if sync_score >= 85:
+        st.markdown(sound_html, unsafe_allow_html=True)
+
+# SIDEBAR: CONTROLES
 with st.sidebar:
     st.markdown("### 📡 SUBSYSTEM INPUT")
     v1 = st.slider("V-TENSOR", -500.0, 500.0, 120.0)
@@ -45,95 +70,62 @@ with st.sidebar:
     v5 = st.slider("R-MASS", 1.5, 4.5, 2.8)
     v6 = st.slider("STRAT-POR", 0.0, 40.0, 15.0)
 
-# CÁLCULOS DINÁMICOS
-sync_score = (v4 * 8) + (v6 / 2)
 depth = (v3 / 5) + (v5 * 100)
-
 st.markdown('<div class="main-title">SINCRO+ X | PREDICTIVE GEODESY SYSTEM</div>', unsafe_allow_html=True)
 
-# --- CABECERA DE COHERENCIA (NUEVA ESTRUCTURA) ---
-c_col1, c_col2, c_col3 = st.columns([1, 1, 1])
-with c_col2:
+# --- CABECERA: COHERENCE INDEX Y CONFIRMACIÓN (PARPADEANTES) ---
+c1, c2, c3 = st.columns([1, 1.5, 1])
+with c2:
     st.markdown('<div class="label-outside">COHERENCE INDEX</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="value-box">{sync_score:.1f}%</div>', unsafe_allow_html=True)
-    
-    # Semáforo dinámico: Verde -> Amarillo -> Rojo
-    if sync_score < 40:
-        color, text = "#2E7D32", "SCANNING: INITIAL PHASE" # Verde
-    elif sync_score < 85:
-        color, text = "#FBC02D", "SCANNING: TARGET ACQUISITION" # Amarillo
-    else:
-        color, text = "#B71C1C", "DRILLING POINT CONFIRMED" # Rojo
-        
-    st.markdown(f'<div class="status-indicator" style="background-color:{color}; color:white;">{text}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="value-box {blink_class}">{sync_score:.1f}%</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="status-box {blink_class}">{status_text}</div>', unsafe_allow_html=True)
+    play_discovery_sound()
 
-# --- CUERPO PRINCIPAL ---
-col_left, col_center, col_right = st.columns([1, 2, 1])
+# --- CUERPO: TIERRA FONDO Y COORDENADAS ---
+col_l, col_r = st.columns([2.5, 1])
 
-with col_left:
-    st.markdown('<div class="label-outside">TARGET COORDINATES</div>', unsafe_allow_html=True)
-    st.markdown(f"""<div class="modular-panel">
-        <p>LAT: {4.71 + (v1/1000):.4f} | LON: {-74.07 + (v2/1000):.4f}</p>
-        <p style="font-size: 1.2em; font-weight: bold;">DEPTH: {depth:.1f} m</p>
-    </div>""", unsafe_allow_html=True)
-
-    st.markdown('<div class="label-outside">STREAM VARIATION</div>', unsafe_allow_html=True)
-    st.markdown('<div class="modular-panel">', unsafe_allow_html=True)
-    st.line_chart(np.random.randn(20) * (v4/10), height=150)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with col_center:
-    # TIERRA AZUL CIELO CON LÍNEAS DINÁMICAS
-    # La rotación y densidad de malla dependen de v1 y v6
-    steps = int(20 + (v6/2))
+with col_l:
+    # TIERRA AZUL CIELO INTEGRADA AL FONDO
+    steps = int(25 + (v6/2))
     phi, theta = np.mgrid[0:2*np.pi:complex(steps), 0:np.pi:complex(steps)]
     x, y, z = np.cos(phi)*np.sin(theta), np.sin(phi)*np.sin(theta), np.cos(theta)
     
     fig_globe = go.Figure()
     fig_globe.add_trace(go.Surface(
-        x=x, y=y, z=z, 
-        opacity=0.8, 
-        colorscale=[[0, '#87CEEB'], [1, '#00BFFF']], # Azul Cielo
-        showscale=False,
-        contours=dict(
-            x=dict(show=True, color="white", width=1 + (v4/5)),
-            y=dict(show=True, color="white", width=1 + (v4/5))
-        )
+        x=x, y=y, z=z, opacity=0.85, colorscale=[[0, '#87CEEB'], [1, '#00BFFF']], showscale=False,
+        contours=dict(x=dict(show=True, color="white", width=1+(v4/4)), y=dict(show=True, color="white", width=1+(v4/4)))
     ))
     
-    # Diamante de localización
     dx, dy = np.clip(v1/500, -0.9, 0.9), np.clip(v2/500, -0.9, 0.9)
-    fig_globe.add_trace(go.Scatter3d(x=[dx], y=[dy], z=[0.8], mode='markers', 
-                                   marker=dict(size=15, color='#00FF00', symbol='diamond')))
+    fig_globe.add_trace(go.Scatter3d(x=[dx], y=[dy], z=[0.85], mode='markers', 
+                                   marker=dict(size=22, color='#FF0000' if sync_score > 85 else '#00FF00', 
+                                               symbol='diamond', line=dict(color='black', width=3))))
 
-    fig_globe.update_layout(
-        scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=0,r=0,b=0,t=0), height=600
-    )
+    fig_globe.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
+                           paper_bgcolor='rgba(0,0,0,0)', margin=dict(l=0,r=0,b=0,t=0), height=700)
     st.plotly_chart(fig_globe, use_container_width=True)
 
-with col_right:
-    # GEOPHYSICAL SIGNATURE (FORZADA PARA VISIBILIDAD)
-    st.markdown('<div class="label-outside">GEOPHYSICAL SIGNATURE</div>', unsafe_allow_html=True)
-    st.markdown('<div class="modular-panel">', unsafe_allow_html=True)
+with col_r:
+    # COORDENADAS RESALTADAS (PARPADEAN SI SE ENCUENTRA EL PUNTO)
+    st.markdown('<div class="label-outside">DRILLING TARGET DATA</div>', unsafe_allow_html=True)
+    blink_coord = blink_class if sync_score > 85 else ""
     
-    categories = ['V-TEN', 'MAG', 'K-THR', 'C-MAT', 'R-DEN', 'STRAT']
-    # Normalización para asegurar que la araña nunca sea 0
-    r_values = [max(10, abs(v1)/5), max(10, abs(v2)/5), v3/9, v4*10, v5*20, v6*2.2]
-    
-    fig_radar = go.Figure(data=go.Scatterpolar(
-        r=r_values, theta=categories, fill='toself', 
-        fillcolor='rgba(13, 71, 161, 0.4)', line=dict(color='#0D47A1', width=3)
-    ))
-    
-    fig_radar.update_layout(
-        polar=dict(
-            radialaxis=dict(visible=True, range=[0, 110], gridcolor="#DDD"),
-            angularaxis=dict(tickfont=dict(size=12, color="#0D47A1", family="Arial Black"))
-        ),
-        showlegend=False, height=400, margin=dict(l=40, r=40, b=20, t=20),
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
+    st.markdown(f"""
+        <div class="coord-panel {blink_coord}">
+            <h3 style="color:#0D47A1; margin:0;">X-VECTOR (LAT)</h3>
+            <p style="font-size: 1.8em; font-weight: bold;">{4.71 + (v1/1000):.5f}</p>
+            <hr>
+            <h3 style="color:#0D47A1; margin:0;">Y-VECTOR (LON)</h3>
+            <p style="font-size: 1.8em; font-weight: bold;">{-74.07 + (v2/1000):.5f}</p>
+            <hr>
+            <h3 style="color:#B71C1C; margin:0;">REF-DEPTH</h3>
+            <p style="font-size: 2.2em; font-weight: bold; color:#B71C1C;">{depth:.1f} M</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # GEOPHYSICAL SIGNATURE (ASEGURANDO VISIBILIDAD)
+    st.markdown('<div class="label-outside" style="margin-top:20px;">GEOPHYSICAL SIGNATURE</div>', unsafe_allow_html=True)
+    r_vals = [max(15, abs(v1)/5), max(15, abs(v2)/5), v3/9, v4*10, v5*20, v6*2.2]
+    fig_radar = go.Figure(data=go.Scatterpolar(r=r_vals, theta=['V-TEN', 'MAG', 'K-THR', 'C-MAT', 'R-DEN', 'STRAT'], fill='toself', fillcolor='rgba(13, 71, 161, 0.4)', line=dict(color='#0D47A1', width=3)))
+    fig_radar.update_layout(polar=dict(angularaxis=dict(tickfont=dict(size=12, color="#0D47A1", family="Arial Black"))), showlegend=False, height=350, margin=dict(l=40, r=40, b=20, t=20), paper_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig_radar, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
