@@ -1,80 +1,94 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import plotly.graph_objects as go
+import time
 
-# 1. ESTÉTICA DE CONSOLA DE COMANDO (DARK-TECH)
-st.set_page_config(page_title="SINCRO-X | ABYSSAL GAS PREDICTOR", layout="wide")
+# CONFIGURACIÓN DE ALTA SEGURIDAD
+st.set_page_config(page_title="SINCRO-X | DEEP CORE ANALYTICS", layout="wide")
 
+# CSS: ESTÉTICA NASA / ORIÓN (Plata, Azul Abisal y Cromo)
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;500&display=swap');
-    .stApp { background-color: #020408; color: #00ff41; font-family: 'Roboto Mono', monospace; }
-    .stMetric { background: linear-gradient(135deg, #0d1117 0%, #161b22 100%); border: 1px solid #d4af37; border-radius: 5px; }
-    h1, h2, h3 { font-family: 'Orbitron', sans-serif; color: #d4af37; text-transform: uppercase; letter-spacing: 2px; }
-    .stSlider { color: #d4af37; }
-    .css-10trblm { font-size: 14px; color: #8b949e; } /* Subtítulos */
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;600&display=swap');
+    .stApp { background: radial-gradient(circle, #0a192f 0%, #020c1b 100%); color: #e6f1ff; font-family: 'Share Tech Mono', monospace; }
+    h1, h2 { font-family: 'Rajdhani', sans-serif; color: #64ffda; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0px 0px 10px #64ffda; }
+    .stMetric { background: rgba(23, 42, 73, 0.7); border: 1px solid #64ffda; border-radius: 10px; padding: 15px; }
+    .sidebar-text { font-size: 10px; color: #8892b0; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. ENCABEZADO ESTRATÉGICO
-st.title("🛡️ SINCRO-X : PROTOCOLO DE GAS PRIMORDIAL")
-st.caption("SISTEMA DE ANÁLISIS DE BASAMENTO CRISTALINO | PROYECTO JERICÓ")
-
-# 3. PANELES DE OPERACIÓN
-col_control, col_map, col_data = st.columns([1, 2, 1])
-
-with col_control:
-    st.subheader("⌨️ INPUT SENSORES")
-    # Nombres codificados para protección total de IP
-    v1 = st.slider("ANOMALÍA GRAV. BOUGUER (mGal)", -100.0, 100.0, -32.0, help="Diferencial de Masa Volumétrica")
-    v2 = st.slider("LINEAMIENTO MAG. (nT/m)", 0.0, 50.0, 12.5, help="Vector de Flujo Estructural")
-    v3 = st.slider("GRADIENTE TÉRMICO (°C/km)", 20, 180, 45, help="Energía Endógena de la Singularidad")
-    v4 = st.number_input("DENSIDAD DE MATRIZ (g/cm³)", 2.4, 3.2, 2.67)
-    v5 = st.checkbox("AUTORIZACIÓN POROSIDAD 1°", value=True)
-    
+# BARRA LATERAL: CASCADA DE DATOS (HEX FLOW)
+with st.sidebar:
+    st.markdown("### DECRYPTING DATASTREAM")
+    for _ in range(5):
+        st.caption(f"0x{int(time.time()):x}..{np.random.randint(1000,9999)}..SYNC_OK")
     st.write("---")
-    # Lógica de Sincronía Avanzada
-    sincronia = (abs(v1) * 0.25) + (v2 * 0.35) + (v3 * 0.8) + (v4 * 2)
-    if v5: sincronia += 10
-    prob = min(99.8, (sincronia / 1.5))
-    
-    st.write("**STATUS DEL SISTEMA:**")
-    if prob > 85:
-        st.success("🟢 OBJETIVO VALIDADO")
-    else:
-        st.warning("🟡 ESCANEANDO BASAMENTO...")
+    st.markdown("### SENSORES DE MATRIZ")
+    v1 = st.slider("DTGQ (μGal)", -500.0, 500.0, -124.0)
+    v2 = st.slider("VECTOR MAG. RESONANCE", 0.0, 100.0, 42.0)
+    v3 = st.slider("EXCITACIÓN ENDÓGENA (K)", 273, 600, 450)
+    v4 = st.number_input("CRISTAL RESONANCE INDEX", 2.0, 4.0, 2.85)
+    v5 = st.selectbox("PROB-ALPHA PROTOCOL", ["ACTIVE", "STANDBY", "LOCKED"])
 
-with col_map:
-    st.subheader("🌐 TARGETING: ÁREA 10 KM²")
-    # Simulación de coordenadas en el área de interés (ej. cerca a Cartagena/Cuencas Frontera)
-    target_lat, target_lon = 10.4, -75.4 
-    map_data = pd.DataFrame({'lat': [target_lat], 'lon': [target_lon]})
-    st.map(map_data, zoom=12)
-    
-    if prob > 85:
-        st.code(f"COORDENADA DETECTADA:\nLAT: {target_lat}921\nLON: {target_lon}485\nDEPTH: 4,850m (BASEMENT)", language='bash')
-    else:
-        st.info("AJUSTE SENSORES PARA LOCALIZAR PUNTO DE SINCRONÍA")
+# CUERPO PRINCIPAL
+st.title("🛰️ SINCRO-X : DEEP CORE ANALYTICS")
+st.subheader("SISTEMA DE PROSPECCIÓN CUÁNTICA - PROYECTO JERICÓ")
 
-with col_data:
-    st.subheader("📊 ANALÍTICA")
-    # El Predictor de Firma Isotópica (La Bala de Plata)
-    iso = -22 + (prob/10) if prob > 50 else -45
-    st.metric("FIRMA δ¹³C PROYECTADA", f"{iso:.2f} ‰", delta="PRIMORDIAL" if iso > -20 else "BIÓTICO", delta_color="normal")
-    
-    st.metric("PRESIÓN DE CABEZAL", f"{v3 * 340:,} PSI")
-    st.metric("ENTALPÍA DEL SISTEMA", f"{v3 * 4.8:.1f} kJ/kg")
-    
-    st.write("---")
-    st.write("**LOGOS PREDICTIVE ENGINE**")
-    st.caption("V. 3.01 - 2026")
+col_left, col_mid, col_right = st.columns([1, 2, 1])
 
-# 4. CIERRE TÉCNICO
+# COLUMNA IZQUIERDA: NÚMEROS EN MOVIMIENTO
+with col_left:
+    st.write("📡 TELEMETRÍA")
+    placeholder = st.empty()
+    # Simulación de flujo de datos
+    df_data = pd.DataFrame(np.random.randn(10, 2), columns=['X-AXIS', 'Y-AXIS'])
+    st.line_chart(df_data)
+    st.markdown("<div style='color:#64ffda'>LATENCY: 0.002ms<br>BUFFER: 98%</div>", unsafe_allow_html=True)
+
+# COLUMNA CENTRAL: LA TIERRA 3D (NASA STYLE)
+with col_mid:
+    # Generar esfera 3D
+    phi = np.linspace(0, 2*np.pi, 50)
+    theta = np.linspace(0, np.pi, 50)
+    x = np.outer(np.cos(phi), np.sin(theta))
+    y = np.outer(np.sin(phi), np.sin(theta))
+    z = np.outer(np.ones(np.size(phi)), np.cos(theta))
+
+    fig = go.Figure(data=[go.Surface(x=x, y=y, z=z, 
+                                     colorscale='Blues', 
+                                     showscale=False, 
+                                     opacity=0.3)])
+    # Agregar punto del yacimiento
+    fig.add_trace(go.Scatter3d(x=[0.2], y=[0.5], z=[0.8], 
+                               mode='markers', 
+                               marker=dict(size=10, color='#64ffda', symbol='diamond')))
+    
+    fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
+                      margin=dict(l=0, r=0, b=0, t=0), 
+                      paper_bgcolor='rgba(0,0,0,0)',
+                      plot_bgcolor='rgba(0,0,0,0)',
+                      height=500)
+    
+    st.plotly_chart(fig, use_container_width=True)
+    st.info("ANÁLISIS DE SINGULARIDAD EN CAPA DE BASAMENTO DETECTADO")
+
+# COLUMNA DERECHA: ANALÍTICA AVANZADA
+with col_right:
+    st.write("📊 QUANTUM RESULTS")
+    prob_real = (v3 / 6) + (v2 * 0.5)
+    st.metric("ÍNDICE DE SINCRONÍA", f"{prob_real:.2f}%", delta="STABLE")
+    
+    # Gráfico de Radar para despistar
+    categories = ['Tensión','Flujo','Masa','Calor','Resonancia']
+    fig_radar = go.Figure(data=go.Scatterpolar(
+      r=[v1/10, v2, v3/6, v4*20, 50],
+      theta=categories,
+      fill='toself',
+      line_color='#64ffda'
+    ))
+    fig_radar.update_layout(polar=dict(bgcolor='#0a192f'), showlegend=False, height=300, margin=dict(l=20, r=20, b=20, t=20))
+    st.plotly_chart(fig_radar, use_container_width=True)
+
 st.write("---")
-with st.expander("📝 NOTA DE AUTORIDAD TÉCNICA"):
-    st.write(f"""
-    Este protocolo desestima la teoría biótica tradicional mediante la integración de 5 variables geofísicas. 
-    La sincronía de anomalías negativas de masa y lineamientos de sutura tectónica confirman la presencia de 
-    Metano Abiótico en el Basamento Cristalino.
-    """)
-    st.caption("Dr. Edgar Espíndola Niño | Investigador Principal")
+st.caption(f"LOGOS PREDICTIVE ENGINE V.4.0 | AUTH: DR. ESPÍNDOLA NIÑO | {time.strftime('%Y-%m-%d %H:%M:%S')}")
