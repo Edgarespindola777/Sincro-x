@@ -4,91 +4,126 @@ import numpy as np
 import plotly.graph_objects as go
 import time
 
-# CONFIGURACIÓN DE ALTA SEGURIDAD
-st.set_page_config(page_title="SINCRO-X | DEEP CORE ANALYTICS", layout="wide")
+# CONFIGURACIÓN DE INTERFAZ PROFESIONAL
+st.set_page_config(page_title="SINCRO-X | MISSION CONTROL", layout="wide")
 
-# CSS: ESTÉTICA NASA / ORIÓN (Plata, Azul Abisal y Cromo)
+# CSS: ESTÉTICA DE INSTRUMENTACIÓN CIENTÍFICA (NASA STYLE)
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;600&display=swap');
-    .stApp { background: radial-gradient(circle, #0a192f 0%, #020c1b 100%); color: #e6f1ff; font-family: 'Share Tech Mono', monospace; }
-    h1, h2 { font-family: 'Rajdhani', sans-serif; color: #64ffda; text-transform: uppercase; letter-spacing: 5px; text-shadow: 0px 0px 10px #64ffda; }
-    .stMetric { background: rgba(23, 42, 73, 0.7); border: 1px solid #64ffda; border-radius: 10px; padding: 15px; }
-    .sidebar-text { font-size: 10px; color: #8892b0; }
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;500&display=swap');
+    .stApp { background-color: #050505; color: #D1D1D1; font-family: 'JetBrains Mono', monospace; }
+    .stMetric { background: #0a0a0a; border-left: 3px solid #4CAF50; padding: 10px; }
+    h1, h2, h3 { color: #FFFFFF; font-weight: 300; letter-spacing: 2px; border-bottom: 1px solid #333; }
+    .sidebar .sidebar-content { background-color: #0a0a0a; }
     </style>
     """, unsafe_allow_html=True)
 
-# BARRA LATERAL: CASCADA DE DATOS (HEX FLOW)
+# --- LÓGICA DE CONTROLADORES (SIDEBAR) ---
 with st.sidebar:
-    st.markdown("### DECRYPTING DATASTREAM")
-    for _ in range(5):
-        st.caption(f"0x{int(time.time()):x}..{np.random.randint(1000,9999)}..SYNC_OK")
+    st.markdown("### 🛰️ SUBSYSTEMS INPUT")
+    st.write("MATRIX CALIBRATION")
+    
+    # SENSORES UNIFICADOS
+    v1 = st.slider("GRAVIMETRÍA (DTGQ)", -500.0, 500.0, -112.0)
+    v2 = st.slider("MAGNETOMETRÍA (V-RES)", 0.0, 100.0, 45.0)
+    v3 = st.slider("EXCITACIÓN TÉRMICA (K)", 273, 800, 394)
+    v4 = st.slider("RESONANCIA CRISTALINA", 1.0, 5.0, 2.85)
+    v5 = st.slider("DENSIDAD DE MATRIZ (g/cm³)", 1.5, 4.5, 2.67)
+    v6 = st.slider("POROSIDAD ESTRUCTURAL (%)", 0.0, 30.0, 12.5)
+    
     st.write("---")
-    st.markdown("### SENSORES DE MATRIZ")
-    v1 = st.slider("DTGQ (μGal)", -500.0, 500.0, -124.0)
-    v2 = st.slider("VECTOR MAG. RESONANCE", 0.0, 100.0, 42.0)
-    v3 = st.slider("EXCITACIÓN ENDÓGENA (K)", 273, 600, 450)
-    v4 = st.number_input("CRISTAL RESONANCE INDEX", 2.0, 4.0, 2.85)
-    v5 = st.selectbox("PROB-ALPHA PROTOCOL", ["ACTIVE", "STANDBY", "LOCKED"])
+    status = st.select_slider("SYSTEM STATUS", ["STANDBY", "SYNCING", "LOCKED"], value="SYNCING")
 
-# CUERPO PRINCIPAL
-st.title("🛰️ SINCRO-X : DEEP CORE ANALYTICS")
-st.subheader("SISTEMA DE PROSPECCIÓN CUÁNTICA - PROYECTO JERICÓ")
+# --- CUERPO PRINCIPAL ---
+st.markdown("# SINCRO-X | ANALÍTICA DE BASAMENTO CRISTALINO")
+st.caption(f"COORDENADAS DE PROSPECCIÓN CUÁNTICA | {time.strftime('%H:%M:%S')} UTC")
 
 col_left, col_mid, col_right = st.columns([1, 2, 1])
 
-# COLUMNA IZQUIERDA: NÚMEROS EN MOVIMIENTO
+# COLUMNA IZQUIERDA: TELEMETRÍA NUMÉRICA
 with col_left:
-    st.write("📡 TELEMETRÍA")
-    placeholder = st.empty()
-    # Simulación de flujo de datos
-    df_data = pd.DataFrame(np.random.randn(10, 2), columns=['X-AXIS', 'Y-AXIS'])
-    st.line_chart(df_data)
-    st.markdown("<div style='color:#64ffda'>LATENCY: 0.002ms<br>BUFFER: 98%</div>", unsafe_allow_html=True)
+    st.markdown("### 📊 DATA STREAM")
+    # Simulación de coordenadas dinámicas basadas en los sliders
+    lat_target = 4.7110 + (v1 / 10000)
+    lon_target = -74.0721 + (v2 / 10000)
+    depth_calc = (v3 / 10) + (v5 * 10)
+    
+    st.code(f"TARGET_LAT: {lat_target:.6f}\nTARGET_LON: {lon_target:.6f}\nDEPTH_REF: {depth_calc:.2f}m", language="bash")
+    
+    st.write("VARIACIÓN DE FLUJO")
+    chart_data = pd.DataFrame(np.random.randn(20, 1), columns=['SYNC'])
+    st.line_chart(chart_data, height=150)
 
-# COLUMNA CENTRAL: LA TIERRA 3D (NASA STYLE)
+# COLUMNA CENTRAL: TIERRA 3D Y DIAMANTE DINÁMICO
 with col_mid:
-    # Generar esfera 3D
-    phi = np.linspace(0, 2*np.pi, 50)
-    theta = np.linspace(0, np.pi, 50)
+    # Lógica de posición del diamante (Triangulación)
+    # El diamante se mueve en X, Y por gravimetría/magnetometría y en Z por densidad/porosidad
+    dx = np.cos(v1/100) * 0.8
+    dy = np.sin(v2/10) * 0.8
+    dz = 0.5 + (v6/60) # Sube o baja según porosidad
+    
+    # Esfera Terrestre (Estilo Wireframe NASA)
+    phi = np.linspace(0, 2*np.pi, 60)
+    theta = np.linspace(0, np.pi, 60)
     x = np.outer(np.cos(phi), np.sin(theta))
     y = np.outer(np.sin(phi), np.sin(theta))
     z = np.outer(np.ones(np.size(phi)), np.cos(theta))
 
-    fig = go.Figure(data=[go.Surface(x=x, y=y, z=z, 
-                                     colorscale='Blues', 
-                                     showscale=False, 
-                                     opacity=0.3)])
-    # Agregar punto del yacimiento
-    fig.add_trace(go.Scatter3d(x=[0.2], y=[0.5], z=[0.8], 
-                               mode='markers', 
-                               marker=dict(size=10, color='#64ffda', symbol='diamond')))
-    
-    fig.update_layout(scene=dict(xaxis_visible=False, yaxis_visible=False, zaxis_visible=False),
-                      margin=dict(l=0, r=0, b=0, t=0), 
-                      paper_bgcolor='rgba(0,0,0,0)',
-                      plot_bgcolor='rgba(0,0,0,0)',
-                      height=500)
-    
-    st.plotly_chart(fig, use_container_width=True)
-    st.info("ANÁLISIS DE SINGULARIDAD EN CAPA DE BASAMENTO DETECTADO")
+    fig = go.Figure()
 
-# COLUMNA DERECHA: ANALÍTICA AVANZADA
-with col_right:
-    st.write("📊 QUANTUM RESULTS")
-    prob_real = (v3 / 6) + (v2 * 0.5)
-    st.metric("ÍNDICE DE SINCRONÍA", f"{prob_real:.2f}%", delta="STABLE")
-    
-    # Gráfico de Radar para despistar
-    categories = ['Tensión','Flujo','Masa','Calor','Resonancia']
-    fig_radar = go.Figure(data=go.Scatterpolar(
-      r=[v1/10, v2, v3/6, v4*20, 50],
-      theta=categories,
-      fill='toself',
-      line_color='#64ffda'
+    # Superficie de la Tierra (Sutil)
+    fig.add_trace(go.Surface(x=x, y=y, z=z, opacity=0.15, colorscale='Greys', showscale=False))
+
+    # Diamante de Objetivo (DINÁMICO)
+    fig.add_trace(go.Scatter3d(
+        x=[dx], y=[dy], z=[dz],
+        mode='markers+text',
+        name='TARGET',
+        marker=dict(size=12, color='#4CAF50', symbol='diamond', line=dict(color='white', width=2)),
+        text=[f"POINT ALPHA: {depth_calc:.1f}m"],
+        textposition="top center"
     ))
-    fig_radar.update_layout(polar=dict(bgcolor='#0a192f'), showlegend=False, height=300, margin=dict(l=20, r=20, b=20, t=20))
+
+    # Configuración de Cámara y Estilo
+    fig.update_layout(
+        scene=dict(
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False),
+            zaxis=dict(visible=False),
+            aspectmode='cube'
+        ),
+        margin=dict(l=0, r=0, b=0, t=0),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        height=600,
+        showlegend=False
+    )
+    
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': True}) # Mantiene visibles los controles
+
+# COLUMNA DERECHA: RESULTADOS CUÁNTICOS
+with col_right:
+    st.markdown("### ⚡ ANALÍTICA")
+    # El índice de sincronía ahora depende de la densidad y resonancia
+    sync_idx = (v4 * 15) + (v5 * 5)
+    st.metric("ÍNDICE DE SINCRONÍA", f"{sync_idx:.2f}%", delta=f"{v6/10:.1f} структур")
+    
+    # Firma de Resonancia (Radar)
+    categories = ['Grav', 'Mag', 'Temp', 'Res', 'Dens', 'Poro']
+    fig_radar = go.Figure(data=go.Scatterpolar(
+        r=[abs(v1/5), v2, v3/8, v4*20, v5*20, v6*3],
+        theta=categories,
+        fill='toself',
+        line=dict(color='#4CAF50')
+    ))
+    fig_radar.update_layout(
+        polar=dict(radialaxis=dict(visible=False), bgcolor="#0a0a0a"),
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        height=350,
+        margin=dict(l=40, r=40, b=40, t=40)
+    )
     st.plotly_chart(fig_radar, use_container_width=True)
 
 st.write("---")
-st.caption(f"LOGOS PREDICTIVE ENGINE V.4.0 | AUTH: DR. ESPÍNDOLA NIÑO | {time.strftime('%Y-%m-%d %H:%M:%S')}")
+st.markdown(f"<div style='text-align: center; color: #444;'>LOGOS PREDICTIVE ENGINE V.4.0 | PI: DR. ESPÍNDOLA NIÑO | SECURE ACCESS TERMINAL</div>", unsafe_allow_html=True)
